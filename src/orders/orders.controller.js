@@ -6,12 +6,12 @@ const orders = require(path.resolve("src/data/orders-data"));
 // Use this function to assigh ID's when necessary
 const nextId = require("../utils/nextId");
 
-// TODO: Implement the /orders handlers needed to make the tests pass
-
+//returns a list of all orders
 function list(req, res) {
     res.json({data: orders})
 }
 
+//verifies that the orderId is valid
 function orderExists(req, res, next) {
     const { orderId } = req.params;
     const foundOrder = orders.find((order)=> order.id === orderId)
@@ -25,11 +25,13 @@ function orderExists(req, res, next) {
     });
 }
 
+//returns an order based on its orderId
 function readOrder(req, res, next) {
     const {order} = res.locals;
     res.json({data:order});
 }
 
+//checks to make sure that all fields necessary to create an order
 function validateOrder(req,res,next) {
     const {data:order = {}} = req.body;
     if (!order.deliverTo) {
@@ -53,7 +55,7 @@ function validateOrder(req,res,next) {
             message: `Order must include at least one dish`
         })
     } 
-
+    //validates every dish in the dishes array
     order.dishes.forEach((dish, index) => {
         if ((!dish.quantity)||(dish.quantity<1)||(!Number.isInteger(dish.quantity))) {
             next({
@@ -62,12 +64,11 @@ function validateOrder(req,res,next) {
             })
         }
     })
-
     res.locals.newOrder = order
     next();
-    
 }
 
+//makes sure that the order Ids for update information and current match
 function doIdsMatch(req, res, next) {
     const {newOrder} = res.locals
     const {orderId} = req.params
@@ -81,6 +82,7 @@ function doIdsMatch(req, res, next) {
     }
 }
 
+//adds a provided order to the array of orders
 function createOrder(req,res,next) {
     const {newOrder} = res.locals
     const createdOrder = {
@@ -91,6 +93,7 @@ function createOrder(req,res,next) {
     res.status(201).json({data:createdOrder})
 }
 
+//updates an order while ensuring that its order.id is not overwritten
 function updateOrder(req,res,next) {
     let {order,newOrder} = res.locals;
     order = {
@@ -100,6 +103,7 @@ function updateOrder(req,res,next) {
     res.json({data:order})
 }
 
+//verifies that an order is pending and able to be cancelled
 function canDelete(req, res, next) {
     const {order} = res.locals
     if (order.status === "pending") {
@@ -112,6 +116,7 @@ function canDelete(req, res, next) {
     }
 }
 
+//verifies that an order's status exists and is pending before modification
 function canUpdate(req,res,next) {
     const {newOrder} = res.locals
     if (newOrder.status !== "pending") {
@@ -129,6 +134,7 @@ function canUpdate(req,res,next) {
     };
 }
 
+//cancels an order and removes it from the order list
 function cancelOrder(req,res,next) {
     const orderId = req.params.orderId
     const index = orders.findIndex((order) => order.id === orderId)

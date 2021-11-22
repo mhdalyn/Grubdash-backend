@@ -6,12 +6,12 @@ const dishes = require(path.resolve("src/data/dishes-data"));
 // Use this function to assign ID's when necessary
 const nextId = require("../utils/nextId");
 
-// TODO: Implement the /dishes handlers needed to make the tests pass
-
+//returns a list of all dishes
 function list(req, res) {
     res.json({data: dishes})
 }
 
+//verifies that the dishId is valid
 function dishExists(req, res, next) {
     const { dishId } = req.params;
     const foundDish = dishes.find((dish)=> dish.id === dishId)
@@ -25,11 +25,13 @@ function dishExists(req, res, next) {
     });
 }
 
+//returns a dish based on its dishId
 function read(req, res, next) {
     const {dish} = res.locals;
     res.json({data:dish});
 }
 
+//checks to make sure that all fields necessary to create an order
 function validateDish(req,res,next) {
     const{data: dish = {}} = req.body;
     if (!dish.name) {
@@ -63,6 +65,7 @@ function validateDish(req,res,next) {
     }
 }
 
+//adds a provided dish to the array of dishes
 function createDish(req,res,next) {
     const {newDish} = res.locals
     const createdDish = {
@@ -73,6 +76,7 @@ function createDish(req,res,next) {
     res.status(201).json({data:createdDish})
 }
 
+//makes sure that the dish Ids for update information and current match
 function doIdsMatch(req, res, next) {
     const {newDish} = res.locals
     const {dishId} = req.params
@@ -86,6 +90,7 @@ function doIdsMatch(req, res, next) {
     }
 }
 
+//updates a dish while ensuring that its dish.id is not overwritten
 function updateDish(req,res,next) {
     let {dish,newDish} = res.locals;
     dish = {
