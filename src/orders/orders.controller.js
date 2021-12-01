@@ -34,22 +34,23 @@ function readOrder(req, res, next) {
 //checks to make sure that all fields necessary to create an order
 function validateOrder(req,res,next) {
     const {data:order = {}} = req.body;
-    if (!order.deliverTo) {
-        next({
-            status:400,
-            message: `Order must include a deliverTo`
-        })
-    } else if (!order.mobileNumber) {
-        next({
-            status:400,
-            message: `Dish must include a mobileNumber`
-        })
-    } else if(!order.dishes) {
-        next({
-            status:400,
-            message: `Order must include a dish`
-        })
-    } else if(!Array.isArray(order.dishes)||!order.dishes.length) {
+    const requiredFields = ["deliverTo", "mobileNumber", "dishes"]
+    for (let field of requiredFields) {
+        if(!order[field]) {
+            let message = ''
+            switch(field) {
+                case "dishes": 
+                    message = `Order must include a dish`
+                    break;
+                default: message = `Order must include a ${field}`
+            }
+            next({
+                status:400,
+                message
+            })
+        }
+    }
+    if(!Array.isArray(order.dishes)||!order.dishes.length) {
         next({
             status:400,
             message: `Order must include at least one dish`

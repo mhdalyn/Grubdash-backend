@@ -34,35 +34,24 @@ function read(req, res, next) {
 //checks to make sure that all fields necessary to create an order
 function validateDish(req,res,next) {
     const{data: dish = {}} = req.body;
-    if (!dish.name) {
-        next({
-            status:400,
-            message: `Dish must include a name`
-        })
-    } else if (!dish.description) {
-        next({
-            status:400,
-            message: `Dish must include a description`
-        })
-    } else if(!dish.price) {
-        next({
-            status:400,
-            message: `Dish must include a price`
-        })
-    } else if(!(Number.isInteger(dish.price)) || dish.price <= 0) {
+    const requiredFields = ["name", "description", "price", "image_url"];
+    for(let field of requiredFields) {
+        if (!dish[field]) {
+            next({
+                status:400,
+                message: `Dish must include a ${field}`
+            })
+        }
+    }
+    if(!(Number.isInteger(dish.price)) || dish.price <= 0) {
         next({
             status:400,
             message: `Dish must have a price that is an integer greater than 0`
         })
-    } else if (!dish.image_url) {
-        next({
-            status:400,
-            message: `	Dish must include a image_url`
-        })
-    } else {
-        res.locals.newDish = dish
-        next();
-    }
+    } 
+    res.locals.newDish = dish
+    next();
+    
 }
 
 //adds a provided dish to the array of dishes
